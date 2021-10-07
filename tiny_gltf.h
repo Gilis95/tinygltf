@@ -198,7 +198,8 @@ typedef enum {
   STRING_TYPE,
   ARRAY_TYPE,
   BINARY_TYPE,
-  OBJECT_TYPE
+  OBJECT_TYPE,
+  UINT_TYPE
 } Type;
 
 static inline int32_t GetComponentSizeInBytes(uint32_t componentType) {
@@ -275,6 +276,7 @@ class Value {
     int_value_ = i;
     real_value_ = i;
   }
+  explicit Value(uint64_t ui) : type_(UINT_TYPE), uint_value_(ui) {}
   explicit Value(double n) : type_(REAL_TYPE) { real_value_ = n; }
   explicit Value(const std::string &s) : type_(STRING_TYPE) {
     string_value_ = s;
@@ -303,6 +305,8 @@ class Value {
   bool IsBool() const { return (type_ == BOOL_TYPE); }
 
   bool IsInt() const { return (type_ == INT_TYPE); }
+
+  bool IsUInt() const { return (type_ == UINT_TYPE); }
 
   bool IsNumber() const { return (type_ == REAL_TYPE) || (type_ == INT_TYPE); }
 
@@ -392,6 +396,7 @@ class Value {
   int type_ = NULL_TYPE;
 
   int int_value_ = 0;
+  uint64_t uint_value_ = 0;
   double real_value_ = 0.0;
   std::string string_value_;
   std::vector<unsigned char> binary_value_;
@@ -416,6 +421,7 @@ class Value {
 TINYGLTF_VALUE_GET(bool, boolean_value_)
 TINYGLTF_VALUE_GET(double, real_value_)
 TINYGLTF_VALUE_GET(int, int_value_)
+TINYGLTF_VALUE_GET(uint64_t, uint_value_)
 TINYGLTF_VALUE_GET(std::string, string_value_)
 TINYGLTF_VALUE_GET(std::vector<unsigned char>, binary_value_)
 TINYGLTF_VALUE_GET(Value::Array, array_value_)
@@ -3194,8 +3200,9 @@ static bool ParseJsonAsValue(Value *ret, const json &o) {
       val = Value(o.get<bool>());
       break;
     case json::value_t::number_integer:
-    case json::value_t::number_unsigned:
       val = Value(static_cast<int>(o.get<int64_t>()));
+    case json::value_t::number_unsigned:
+      val = Value(o.get<uint64_t>());
       break;
     case json::value_t::number_float:
       val = Value(o.get<double>());
