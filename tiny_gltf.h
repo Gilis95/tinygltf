@@ -6504,6 +6504,9 @@ static bool ValueToJson(const Value &value, json *ret) {
       }
       break;
     }
+    case UINT_TYPE:
+      obj = json(value.Get<uint64_t>());
+      break;
     case NULL_TYPE:
     default:
       return false;
